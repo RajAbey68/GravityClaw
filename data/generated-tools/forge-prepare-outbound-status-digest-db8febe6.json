@@ -1,0 +1,8 @@
+{
+  "id": "forge-prepare-outbound-status-digest-db8febe6",
+  "description": "Forge-generated capability tool for: prepare outbound status digest",
+  "risk": "safe",
+  "capability": "prepare outbound status digest",
+  "responseTemplate": "Capability \"prepare outbound status digest\" executed at {{timestamp}} with input:\n{{input}}",
+  "version": "1.0.0"
+}

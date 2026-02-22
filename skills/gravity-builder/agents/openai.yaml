@@ -1,0 +1,3 @@
+display_name: Gravity Builder
+short_description: Extend Gravity Claw modules safely and cleanly.
+default_prompt: Implement Gravity Claw features with strict modular boundaries, audit-first changes, and secure local-first defaults.

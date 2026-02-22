@@ -1,0 +1,5 @@
+{
+  "name": "toolsmith",
+  "version": "0.1.0",
+  "description": "Design and harden new tool interfaces with policy checks and sandbox constraints."
+}

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Gravity Claw logo">
+  <defs>
+    <linearGradient id="core" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6df7ff"/>
+      <stop offset="50%" stop-color="#19d1c3"/>
+      <stop offset="100%" stop-color="#0a6c68"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#19d1c3" stop-opacity="0.2"/>
+      <stop offset="50%" stop-color="#9af8ff" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#19d1c3" stop-opacity="0.2"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7df4ff" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#7df4ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="60" cy="60" r="50" fill="url(#glow)"/>
+  <circle cx="60" cy="60" r="43" fill="none" stroke="url(#ring)" stroke-width="6" stroke-linecap="round" stroke-dasharray="36 12 18 16"/>
+  <circle cx="60" cy="60" r="21" fill="#0b1b22" stroke="#1e3f4c" stroke-width="2.8"/>
+  <path d="M60 42 L73 58 L60 74 L47 58 Z" fill="url(#core)" opacity="0.95"/>
+  <path d="M60 32 C64 40 64 48 60 54 C56 48 56 40 60 32 Z" fill="url(#core)"/>
+  <path d="M40 56 C49 57 54 61 56 68 C49 67 43 64 40 56 Z" fill="url(#core)"/>
+  <path d="M80 56 C71 57 66 61 64 68 C71 67 77 64 80 56 Z" fill="url(#core)"/>
+</svg>

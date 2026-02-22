@@ -1,0 +1,14 @@
+:root {
+  --gc-bg: #0b1216;
+  --gc-bg-soft: #101a20;
+  --gc-surface: #142128;
+  --gc-surface-elev: #182a34;
+  --gc-border: #254150;
+  --gc-text: #dcf7ff;
+  --gc-muted: #8bb5c4;
+  --gc-primary: #19d1c3;
+  --gc-primary-soft: #0a6c68;
+  --gc-alert: #f4b860;
+  --gc-danger: #ff7a7a;
+  --gc-radius: 14px;
+}

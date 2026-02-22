@@ -1,0 +1,61 @@
+{
+  "name": "gravity-claw",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gravity Claw local-first autonomous agent platform",
+  "scripts": {
+    "dev": "tsx src/server/bootstrap.ts",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 NEXT_DISABLE_SWC_WORKER=1 next build",
+    "start": "cross-env NODE_ENV=production tsx src/server/bootstrap.ts",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "check": "npm run lint && npm run typecheck && npm run test"
+  },
+  "dependencies": {
+    "@pinecone-database/pinecone": "^4.0.0",
+    "@playwright/browser-chromium": "^1.48.0",
+    "clsx": "^2.1.1",
+    "d3": "^7.9.0",
+    "d3-force": "^3.0.0",
+    "dotenv": "^16.4.5",
+    "express-rate-limit": "^7.4.1",
+    "formidable": "^3.5.1",
+    "framer-motion": "^12.34.3",
+    "highlight.js": "^11.10.0",
+    "lucide-react": "^0.575.0",
+    "next": "14.2.18",
+    "node-cron": "^3.0.3",
+    "pdfjs-dist": "^4.7.76",
+    "playwright": "^1.48.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-markdown": "^9.0.1",
+    "rehype-highlight": "^7.0.0",
+    "remark-gfm": "^4.0.0",
+    "serpapi": "^2.0.0",
+    "sqlite3": "^5.1.7",
+    "tailwind-merge": "^3.5.0",
+    "wavesurfer.js": "^7.8.5",
+    "ws": "^8.18.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/ws": "^8.5.13",
+    "autoprefixer": "^10.4.20",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "14.2.18",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20.11.0"
+  }
+}

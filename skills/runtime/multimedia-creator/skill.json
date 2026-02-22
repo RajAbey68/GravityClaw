@@ -1,0 +1,7 @@
+{
+  "name": "multimedia-creator",
+  "version": "0.1.0",
+  "description": "Generate campaign-ready multimedia assets (script, image, audio, storyboard) using the media-generate tool.",
+  "dependencies": ["media-generate"]
+}
+
