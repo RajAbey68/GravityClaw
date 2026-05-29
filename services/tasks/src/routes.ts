@@ -135,14 +135,17 @@ export function createTasksRouter(repo: TasksRepository, internalKey: string | u
       return;
     }
 
+    // Only forward array fields when explicitly present in the request body.
+    // Passing undefined preserves existing values in the repository; passing
+    // parseArray(undefined) → [] would silently clear them on status-only patches.
     const updated = await repo.updateTask(req.params["id"]!, {
       title: body.title,
       description: body.description,
       status: body.status,
       priority: body.priority,
       assignedAgentId: body.assignedAgentId,
-      requiredSkills: parseArray(body.requiredSkills),
-      tags: parseArray(body.tags),
+      requiredSkills: "requiredSkills" in body ? parseArray(body.requiredSkills) : undefined,
+      tags: "tags" in body ? parseArray(body.tags) : undefined,
       deliverables: Array.isArray(body.deliverables)
         ? (body.deliverables as Array<Record<string, unknown>>).filter(
             (item): item is Record<string, unknown> => typeof item === "object" && item !== null

@@ -147,6 +147,16 @@ describe("TasksRepository", () => {
     expect(updated!.tags).toEqual(["keep-me"]);
   });
 
+  it("clears tags when an explicit empty array is passed", async () => {
+    const task = await repo.createTask({
+      workspaceId: "default",
+      title: "Tagged",
+      tags: ["remove-me"],
+    });
+    const updated = await repo.updateTask(task!.id, { tags: [] });
+    expect(updated!.tags).toEqual([]);
+  });
+
   // ── deleteTask ───────────────────────────────────────────────────────────
 
   it("returns false when deleting a non-existent task", async () => {
