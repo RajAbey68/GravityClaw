@@ -5,7 +5,14 @@ import { PROVIDER_IDS } from "@/src/core/providers/types";
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().default(3000),
+  // In production (Railway) the volume is mounted at /data — set DATABASE_PATH=/data/gravity-claw.sqlite.
+  // Default keeps local dev working without extra config.
   DATABASE_PATH: z.string().default("./data/gravity-claw.sqlite"),
+  // When set, mission/tasks requests are proxied to this service URL.
+  // Unset = monolith handles tasks directly (default, safe fallback).
+  TASKS_SERVICE_URL: z.string().url().optional(),
+  // Shared secret for internal service-to-service calls.
+  INTERNAL_SERVICE_KEY: z.string().optional(),
   TELEGRAM_BOT_TOKEN: z.string().optional(),
   TELEGRAM_ALLOWED_USER_IDS: z.string().default("0"),
   TELEGRAM_POLL_INTERVAL_MS: z.coerce.number().default(1800),
@@ -54,6 +61,7 @@ export type AppEnv = z.infer<typeof envSchema> & {
   shellExecEnabled: boolean;
   mcpEnabled: boolean;
   pineconeEnabled: boolean;
+  tasksServiceUrl: string | undefined;
 };
 
 let cachedEnv: AppEnv | null = null;
@@ -118,7 +126,8 @@ export function getEnv(): AppEnv {
     browserAutomationEnabled,
     shellExecEnabled,
     mcpEnabled,
-    pineconeEnabled
+    pineconeEnabled,
+    tasksServiceUrl: parsed.TASKS_SERVICE_URL
   };
 
   return cachedEnv;

@@ -2,6 +2,38 @@ import { NextResponse } from "next/server";
 import { getAppContainer } from "@/src/core/container";
 import { publishEvent } from "@/src/core/interface/websocket/publisher";
 
+// ─── Strangler-fig proxy ────────────────────────────────────────────────────
+// When TASKS_SERVICE_URL is set all task requests are forwarded to the
+// dedicated tasks microservice. The monolith falls back to its own logic when
+// the env var is absent — instant rollback by removing the variable.
+
+async function proxyToTasksService(req: Request, suffix = ""): Promise<Response | null> {
+  const base = process.env["TASKS_SERVICE_URL"];
+  if (!base) return null;
+
+  const origin = new URL(req.url);
+  const target = new URL(`${base.replace(/\/$/, "")}/tasks${suffix}${origin.search}`);
+
+  const headers: Record<string, string> = {
+    "content-type": req.headers.get("content-type") ?? "application/json",
+  };
+  const internalKey = process.env["INTERNAL_SERVICE_KEY"];
+  if (internalKey) headers["x-internal-key"] = internalKey;
+
+  const init: RequestInit = { method: req.method, headers };
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    init.body = await req.text();
+  }
+
+  const upstream = await fetch(target.toString(), init);
+  const body = await upstream.text();
+  return new Response(body, {
+    status: upstream.status,
+    headers: { "content-type": upstream.headers.get("content-type") ?? "application/json" },
+  });
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 type MissionStatus = "inbox" | "assigned" | "in_progress" | "review" | "done";
 type MissionPriority = "low" | "medium" | "high" | "critical";
 
@@ -14,6 +46,9 @@ function parseArray(input: unknown) {
 }
 
 export async function GET(request: Request) {
+  const proxied = await proxyToTasksService(request);
+  if (proxied) return proxied;
+
   const { searchParams } = new URL(request.url);
   const workspaceId = searchParams.get("workspaceId")?.trim() || "default";
   const statusParam = searchParams.get("status")?.trim() as MissionStatus | null;
@@ -37,6 +72,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const proxied = await proxyToTasksService(request);
+  if (proxied) return proxied;
+
   const body = (await request.json()) as {
     workspaceId?: string;
     title?: string;
