@@ -25,12 +25,29 @@ async function proxyToTasksService(req: Request, suffix = ""): Promise<Response 
     init.body = await req.text();
   }
 
-  const upstream = await fetch(target.toString(), init);
-  const body = await upstream.text();
-  return new Response(body, {
-    status: upstream.status,
-    headers: { "content-type": upstream.headers.get("content-type") ?? "application/json" },
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5_000);
+  init.signal = controller.signal;
+
+  try {
+    const upstream = await fetch(target.toString(), init);
+    clearTimeout(timer);
+    const body = await upstream.text();
+    return new Response(body, {
+      status: upstream.status,
+      headers: { "content-type": upstream.headers.get("content-type") ?? "application/json" },
+    });
+  } catch (err) {
+    clearTimeout(timer);
+    const isTimeout = err instanceof Error && err.name === "AbortError";
+    return new Response(
+      JSON.stringify({ error: isTimeout ? "tasks service timed out" : "tasks service unavailable" }),
+      {
+        status: isTimeout ? 504 : 502,
+        headers: { "content-type": "application/json" },
+      }
+    );
+  }
 }
 // ────────────────────────────────────────────────────────────────────────────
 

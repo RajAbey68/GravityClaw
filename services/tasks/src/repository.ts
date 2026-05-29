@@ -164,7 +164,8 @@ export class TasksRepository {
     const existing = await this.getTask(taskId);
     if (!existing) return undefined;
     const nextStatus = patch.status ?? existing.status;
-    const completedAt = nextStatus === "done" ? nowTs() : existing.completed_at;
+    // Match monolith: clear completed_at whenever a task leaves "done" state.
+    const completedAt = nextStatus === "done" ? nowTs() : null;
     this.db.raw
       .prepare(
         `UPDATE mission_tasks

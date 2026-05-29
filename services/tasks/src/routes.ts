@@ -2,7 +2,7 @@
  * Express route handlers for the tasks service.
  * Mirrors the shape of app/api/mission/tasks/route.ts exactly.
  */
-import { Router, type Request, type Response } from "express";
+import { Router, type Request, type Response, type NextFunction } from "express";
 import type { TasksRepository } from "./repository.js";
 
 type MissionStatus = "inbox" | "assigned" | "in_progress" | "review" | "done";
@@ -19,6 +19,14 @@ function parseArray(input: unknown): string[] {
     .filter(Boolean);
 }
 
+/** Wrap an async handler so errors are forwarded to Express error middleware. */
+function wrapAsync(
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<void>
+) {
+  return (req: Request, res: Response, next: NextFunction) =>
+    fn(req, res, next).catch(next);
+}
+
 export function createTasksRouter(repo: TasksRepository, internalKey: string | undefined): Router {
   const router = Router();
 
@@ -31,7 +39,7 @@ export function createTasksRouter(repo: TasksRepository, internalKey: string | u
   }
 
   /** GET /tasks */
-  router.get("/tasks", async (req: Request, res: Response) => {
+  router.get("/tasks", wrapAsync(async (req: Request, res: Response) => {
     if (!checkAuth(req, res)) return;
     const workspaceId = (req.query["workspaceId"] as string | undefined)?.trim() || "default";
     const statusParam = (req.query["status"] as string | undefined)?.trim() as MissionStatus | undefined;
@@ -46,10 +54,10 @@ export function createTasksRouter(repo: TasksRepository, internalKey: string | u
 
     const tasks = await repo.listTasks({ workspaceId, status: statusParam, agentId, limit });
     res.json({ tasks });
-  });
+  }));
 
   /** GET /tasks/:id */
-  router.get("/tasks/:id", async (req: Request, res: Response) => {
+  router.get("/tasks/:id", wrapAsync(async (req: Request, res: Response) => {
     if (!checkAuth(req, res)) return;
     const task = await repo.getTask(req.params["id"]!);
     if (!task) {
@@ -57,10 +65,10 @@ export function createTasksRouter(repo: TasksRepository, internalKey: string | u
       return;
     }
     res.json({ task });
-  });
+  }));
 
   /** POST /tasks */
-  router.post("/tasks", async (req: Request, res: Response) => {
+  router.post("/tasks", wrapAsync(async (req: Request, res: Response) => {
     if (!checkAuth(req, res)) return;
     const body = req.body as {
       workspaceId?: string;
@@ -110,10 +118,10 @@ export function createTasksRouter(repo: TasksRepository, internalKey: string | u
       return;
     }
     res.status(201).json({ ok: true, task: created });
-  });
+  }));
 
   /** PATCH /tasks/:id */
-  router.patch("/tasks/:id", async (req: Request, res: Response) => {
+  router.patch("/tasks/:id", wrapAsync(async (req: Request, res: Response) => {
     if (!checkAuth(req, res)) return;
     const body = req.body as {
       title?: string;
@@ -158,10 +166,10 @@ export function createTasksRouter(repo: TasksRepository, internalKey: string | u
       return;
     }
     res.json({ ok: true, task: updated });
-  });
+  }));
 
   /** DELETE /tasks/:id */
-  router.delete("/tasks/:id", async (req: Request, res: Response) => {
+  router.delete("/tasks/:id", wrapAsync(async (req: Request, res: Response) => {
     if (!checkAuth(req, res)) return;
     const deleted = await repo.deleteTask(req.params["id"]!);
     if (!deleted) {
@@ -169,7 +177,7 @@ export function createTasksRouter(repo: TasksRepository, internalKey: string | u
       return;
     }
     res.json({ ok: true });
-  });
+  }));
 
   return router;
 }

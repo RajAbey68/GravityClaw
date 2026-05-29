@@ -9,7 +9,7 @@
  *   PORT               HTTP port (default: 3001)
  *   INTERNAL_SERVICE_KEY  If set, all requests must carry x-internal-key header
  */
-import express from "express";
+import express, { type Request, type Response, type NextFunction } from "express";
 import { openDb } from "./db.js";
 import { TasksRepository } from "./repository.js";
 import { createTasksRouter } from "./routes.js";
@@ -30,8 +30,18 @@ app.get("/health", (_req, res) => {
 
 app.use("/", createTasksRouter(repo, INTERNAL_KEY));
 
-app.listen(PORT, () => {
-  console.log(`[tasks-service] listening on :${PORT}, db=${DB_PATH}`);
+/** Terminal error middleware — must have 4 params so Express treats it as an error handler. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  console.error("[tasks-service] unhandled error", err);
+  res.status(500).json({ error: "internal server error" });
 });
+
+// Guard: skip listen when imported by tests (supertest binds its own port).
+if (process.env["NODE_ENV"] !== "test") {
+  app.listen(PORT, () => {
+    console.log(`[tasks-service] listening on :${PORT}, db=${DB_PATH}`);
+  });
+}
 
 export { app };

@@ -1,18 +1,23 @@
 FROM node:20-bookworm-slim AS base
 WORKDIR /app
 
-COPY package.json ./
-RUN npm install --omit=dev
+# Install ALL deps (including devDeps) so tsc is available for the build step.
+COPY package.json package-lock.json* ./
+RUN npm install
 
 COPY src ./src
 COPY tsconfig.json ./
 RUN npm run build
 
-# The Railway volume for the shared SQLite file is mounted at /data by the
-# gateway (monolith) service. This service uses the SAME volume so it reads
-# and writes the same file. Only one service should write concurrently — the
-# proxy pattern enforces this: the monolith calls this service over HTTP.
+# Drop dev dependencies — only production deps are needed at runtime.
+RUN npm prune --omit=dev
+
+# The Railway volume for the shared SQLite file is mounted at /data.
+# Both the monolith and this service use the same volume; the strangler-fig
+# proxy pattern ensures only one writer at a time (HTTP serialisation).
 RUN mkdir -p /data
+
+USER node
 
 EXPOSE 3001
 CMD ["node", "dist/index.js"]
