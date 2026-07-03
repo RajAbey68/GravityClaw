@@ -143,6 +143,27 @@ describe("PATCH /tasks/:id", () => {
     const res = await request(app).patch(`/tasks/${id}`).send({ status: "nope" });
     expect(res.status).toBe(400);
   });
+
+  it("preserves requiredSkills and tags when omitted from patch body", async () => {
+    const created = await request(app)
+      .post("/tasks")
+      .send({ workspaceId: "default", title: "T", requiredSkills: ["sql"], tags: ["a", "b"] });
+    const id = created.body.task.id as string;
+    const res = await request(app).patch(`/tasks/${id}`).send({ status: "in_progress" });
+    expect(res.status).toBe(200);
+    expect(res.body.task.required_skills).toEqual(["sql"]);
+    expect(res.body.task.tags).toEqual(["a", "b"]);
+  });
+
+  it("clears tags when explicitly sent as empty array", async () => {
+    const created = await request(app)
+      .post("/tasks")
+      .send({ workspaceId: "default", title: "T", tags: ["a", "b"] });
+    const id = created.body.task.id as string;
+    const res = await request(app).patch(`/tasks/${id}`).send({ tags: [] });
+    expect(res.status).toBe(200);
+    expect(res.body.task.tags).toEqual([]);
+  });
 });
 
 describe("DELETE /tasks/:id", () => {
@@ -184,6 +205,26 @@ describe("auth check", () => {
     const { app, raw } = makeTestApp("secret-key");
     const res = await request(app).get("/tasks").set("x-internal-key", "secret-key");
     expect(res.status).toBe(200);
+    raw.close();
+  });
+
+  it("returns 401 on mutating route when internal key does not match", async () => {
+    const { app, raw } = makeTestApp("secret-key");
+    const res = await request(app)
+      .post("/tasks")
+      .set("x-internal-key", "wrong")
+      .send({ workspaceId: "default", title: "Should not be created" });
+    expect(res.status).toBe(401);
+    raw.close();
+  });
+
+  it("allows mutating route with correct internal key", async () => {
+    const { app, raw } = makeTestApp("secret-key");
+    const res = await request(app)
+      .post("/tasks")
+      .set("x-internal-key", "secret-key")
+      .send({ workspaceId: "default", title: "Created with key" });
+    expect(res.status).toBe(201);
     raw.close();
   });
 });

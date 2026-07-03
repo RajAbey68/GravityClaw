@@ -32,10 +32,11 @@ app.use("/", createTasksRouter(repo, INTERNAL_KEY));
 
 /** Terminal error middleware — must have 4 params so Express treats it as an error handler. */
 app.use((err: unknown, _req: Request, res: Response, next: NextFunction) => {
-  console.error("[tasks-service] unhandled error", err);
   if (res.headersSent) {
+    console.error("[tasks-service] unhandled error, headers already sent", err);
     return next(err);
   }
+  console.error("[tasks-service] unhandled error", err);
   res.status(500).json({ error: "internal server error" });
 });
 
