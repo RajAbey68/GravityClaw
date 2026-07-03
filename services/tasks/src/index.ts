@@ -31,9 +31,11 @@ app.get("/health", (_req, res) => {
 app.use("/", createTasksRouter(repo, INTERNAL_KEY));
 
 /** Terminal error middleware — must have 4 params so Express treats it as an error handler. */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+app.use((err: unknown, _req: Request, res: Response, next: NextFunction) => {
   console.error("[tasks-service] unhandled error", err);
+  if (res.headersSent) {
+    return next(err);
+  }
   res.status(500).json({ error: "internal server error" });
 });
 
